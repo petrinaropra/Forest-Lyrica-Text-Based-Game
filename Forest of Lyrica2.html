@@ -1,0 +1,559 @@
+<!doctype html>
+<title>The Forest of Lyrica - 6</title>
+
+<style>
+    .content {
+    max-width: 300px;
+    margin: auto;
+    padding-top: 30px;
+    }
+    h1{
+    text-align: center;
+    }
+    body {
+        background-image: url('C:/Users/Able Valued Client/Pictures/Game Images/forrest.jpg');
+        background-size: 450px 700px;
+        background-repeat: no-repeat;
+        background-position: center;
+          background-attachment: fixed;
+          background-blend-mode: lighten;
+        }
+    .white{
+        background-color: white;
+    }
+    p{
+        background-color: white;
+        font-weight: bold;
+        text-align: center;
+       }
+</style>
+
+
+<div class="content">
+<div class="white"><h1>The Forest Lyrica</h1></div>
+<img src="" width="300" height="267">
+<p id="output"></p>
+<input id="input" type="text" placeholder="Choose your direction...">
+<button>enter</button>
+<p>Note: Ask for help by typing "help"</p>
+</div>
+
+<script>
+//make game challenging by adding a fairy at the well that will ask a riddle and if the user gets it right then they get the flute
+	//if not the user gets killed by the fairy
+    
+    var right_answer = false;
+    
+	var map = [];
+	map[0] = "An old stone keep.";
+	map[1] = "A deep well.";
+	map[2] = "A sunny glade.";
+	map[3] = "A sleeping dragon.";
+	map[4] = "A narrow pathway.";
+	map[5] = "An ancient gate.";
+	map[6] = "The edge of a river.";
+	map[7] = "A lonely wooden bench.";
+	map[8] = "An isolated cottage. Faint music comes from inside.";
+	
+	
+	//Set the player's start location
+	var mapLocation = 4;
+	
+	//Set the images
+	var images = [];
+	images[0] = "keeep.jpg";
+	images[1] = "well.png";
+	images[2] = "glade.png";
+	images[3] = "dragon.png";
+	images[4] = "narrow_path.jpg";
+	images[5] = "gate.png";
+	images[6] = "rivver.jpg";
+	images[7] = "bennch.jpg";
+	images[8] = "cottage.png";
+	
+	//Set the blocked path messages
+	var blockedPathMessages = [];
+	blockedPathMessages[0] = "It's too dangerous to move that way.";
+	blockedPathMessages[1] = "A mysterious force holds you back.";
+	blockedPathMessages[2] = "A tangle of thorns blocks your way.";
+	blockedPathMessages[3] = "You can't step over the dragon.";
+	blockedPathMessages[4] = "";
+	blockedPathMessages[5] = "The gate locks shut.";
+	blockedPathMessages[6] = "The river is too deep to cross.";
+	blockedPathMessages[7] = "The trees are too thick to pass.";
+	blockedPathMessages[8] = "You're too scared to go that way.";
+	
+	//Set help messages
+	var helpMessages = [];
+	helpMessages[0] = "";
+	helpMessages[1] = "I wonder if you could 'use' something to find out how deep the well is?"
+	helpMessages[2] = "";
+	helpMessages[3] = "Maybe if you had a sword, you could slay the dragon?";
+	helpMessages[4] = "";
+	helpMessages[5] = "";
+	helpMessages[6] = "";
+	helpMessages[7] = "";
+	helpMessages[8] = "This seems like a nice place for music.";
+	
+	//Riddle array
+	riddles = [];
+	riddles[0] = "</br>The river nymph asks, 'What color comes out from scarlet blood </br> and the blue sky?'";           
+	riddles[1] = "</br>The grey fairy asks: 'What can you feel but can not see, catch or smell?'";
+	riddles[2] = "</br>The wizard: 'What forged from heat can slay a dragon?'";
+	
+	//Create the items and set their locations
+	var items = [];
+	var itemLocations = [];
+	
+	//An array to store what the player is carrying
+	var backpack = [];
+	
+	//Initialize the player's input
+	var playersInput = "";
+	
+	//Initialize the gameMessage
+	var gameMessage = "";
+	
+	//Create an array of actions the game understands
+	//and a variable to store the current action
+	var actionsIKnow = ["north", "east", "south", "west", "take", "use", "drop", "help"];
+	var action = "";
+
+	//An array of items the game understands
+	//and a variable to store the current item
+	var itemsIKnow = ["flute", "stone",  "sword"];
+	var item = "";
+	
+	//Create an array of fairies 
+	var magicalBeings = ["river nymph", "grey fairy"];
+	var magicalBeingsLocations = [6, 1];
+	
+	//Create an array of riddle answers
+	//and a variable to store the current answer
+	var riddleAnswers = ["purple", "wind", "bravery"];
+	var answer = "";
+	
+	//The img element
+	var image = document.querySelector("img");
+	
+	//The input and output fields
+	var output = document.querySelector("#output");
+	var input = document.querySelector("#input");
+	
+	//The button
+	var button = document.querySelector("button");
+	button.style.cursor = "pointer";
+	button.addEventListener("click", clickHandler, false);
+    
+    //The enter key
+    document.addEventListener("keydown", function(event) {
+    if(event.keyCode === 13) {
+        clickHandler();
+        }
+	});
+	//Display the player's location
+	render();
+	
+	function clickHandler()
+	{
+	  playGame();
+	}
+	
+	function playGame()
+	{
+		//Get the player's input and convert it to lowercase
+		playersInput = input.value;
+		playersInput = playersInput.toLowerCase();
+		
+		//Reset these variables from the previous turn
+		gameMessage = "";
+		action = "";
+		answer = null;
+		
+		//Figure out the player's action
+		for(i = 0; i < actionsIKnow.length; i++)
+		{
+		  if(playersInput.indexOf(actionsIKnow[i]) !== -1)
+		  {
+			action = actionsIKnow[i];
+			console.log("player's action: " + action);
+			break;
+		   }
+		}
+			
+	//Figure out the item the player wants
+		for(i=0; i < itemsIKnow.length; i++)
+		{
+		  if(playersInput.indexOf(itemsIKnow[i]) !== -1)
+		  {
+			item = itemsIKnow[i];
+			console.log("player's item: " + item);
+		   }
+		}
+		
+		//Figure out the player's answers
+		for(i = 0; i < riddleAnswers.length; i++)
+		{
+			if(playersInput.indexOf(riddleAnswers[i]) !== -1)
+			{
+				answer = riddleAnswers[i];
+				console.log("player's answer: " + answer);
+				break;
+			}
+		}
+		//Choose the correct action
+		switch(action)
+		{
+		  case "north":
+            input.value= null;
+		    if(mapLocation >= 3)
+			{
+			  mapLocation -= 3;
+			  currentLocation = mapLocation;
+			  console.log("current location: " + currentLocation);
+			  console.log("item: " + items.indexOf(item));
+			}
+			else
+			{
+			  gameMessage = blockedPathMessages[mapLocation] + "<br/> Try other directions.";
+			}
+			break;
+		  
+		  case "east":
+            input.value= null;
+		    if(mapLocation % 3 != 2)
+			{
+				mapLocation += 1;
+				currentLocation = mapLocation;
+				console.log("current location: " + currentLocation);
+			}
+			else
+			{
+			  gameMessage = blockedPathMessages[mapLocation] + "<br/> Try other directions.";
+			}
+			break;
+			
+		   case "south":
+            input.value= null;
+		     if(mapLocation < 6)
+			 {
+			   mapLocation += 3;
+			   currentLocation = mapLocation;
+			   console.log("current location: " + currentLocation);
+			 }
+			 else
+			 {
+			   gameMessage = blockedPathMessages[mapLocation] + "<br/> Try other directions."
+			 }
+			 break;
+			 
+		   case "west":
+            input.value= null;
+			 if(mapLocation % 3 != 0)
+			 {
+			   mapLocation -= 1;
+			   currentLocation = mapLocation;
+			   console.log("current location: " + currentLocation);
+			 }
+			 else
+			 {
+			   gameMessage = blockedPathMessages[mapLocation] + "<br/> Try other directions.";
+			 }
+			 break;
+			 
+		   case "help":
+			 //Display a hint if there is one for this location
+			 if(helpMessages[mapLocation] !== "")
+			 {
+				gameMessage = helpMessages[mapLocation] + " " + "</br>";
+			 }
+			 gameMessage += "</br>Try any of these words: "
+			 gameMessage += "</br>north, east, south, west, </br>take stone, ";
+			 gameMessage += " flute or sword, </br>drop sword, stone or ";
+			 gameMessage += "flute, </br>use sword, stone or flute";
+			 break;
+			               						
+		   case "take":
+			takeItem();
+			 break;
+			
+		   case "drop":
+		     dropItem();
+			 break;;
+			 
+		   case "use":
+		     useItem();
+			 break;
+			 
+		   default:
+			 gameMessage = "I don't understand that.";
+		}
+        
+		
+		switch(answer)
+		{
+		   case "purple":
+			if(mapLocation === 6)
+			{
+           
+				gameMessage = "</br>The river nymph stretches out her hand, "
+				gameMessage += "gives you the purple stone and vanishes.";
+				
+				//Add the stone to the world
+                items.push("stone")
+				backpack.push("stone");
+				itemLocations.push(mapLocation);
+                
+                right_answer = true;
+                
+                num += 1;
+			}
+				
+			break;
+		   
+		   case "wind":
+			 if(mapLocation === 1)
+			 {
+				gameMessage = "</br>The grey fairy vanishes into thin air.";
+                
+                right_answer = true;
+			 }
+			 break; 
+			 
+		   case "bravery":
+			 if(mapLocation === 8)
+			 {
+				gameMessage = "</br>The wizard hands over the sword to you.";
+                
+                right_answer = true;
+			 }
+			 break;
+           
+		}
+			 
+		
+		//Render the game
+		render();
+	}
+	
+	function riddle()
+	{
+	
+	  for(var i = 0; i < magicalBeings.length; i++)
+	  {
+		//Find out if there's an item at this location
+		if(mapLocation === magicalBeingsLocations[i])
+		{
+			//Display it
+			output.innerHTML 
+			+= riddles[i];
+            
+            if(right_answer){
+                output.innerHTML = map[mapLocation] + "</br>Directions: South, East, West, North";
+            }
+            
+		}
+	  }
+	}
+
+	function takeItem()
+	{
+	  //Find the index number of the item in the items array 
+	  var itemIndexNumber = items.indexOf(item);
+	  
+	  //Does the item exist in the game world and is it at the player's current location?
+	  if( itemIndexNumber !== -1
+	  && itemLocations[itemIndexNumber] === mapLocation)
+	  {
+	    gameMessage = "You take the " + item + ".";
+		
+		//Add the item to the player's backpack
+		backpack.push(item);
+		
+		//Remove the item from the game world
+		items.splice(itemIndexNumber, 1);
+		itemLocations.splice(itemIndexNumber, 1);
+		
+		//Display in the console for testing
+		console.log("World items: " + items);
+		console.log("backpack items: " + backpack);
+		
+		for(var i = 0; i < magicalBeings.length; i++)
+		{
+			//Find out if there's an item at this location
+			if(mapLocation === magicalBeingsLocations[i])
+			{
+				//Display it
+				riddles[i] = "";
+				magicalBeingsLocations[i] = "";
+			}
+		}
+		
+	  }
+	  else
+	  {
+	  //Message if the player tries to take an item that isn't in the current location
+	  gameMessage = "You can't do that.";
+	  console.log("backpack items: " + backpack);
+	  }
+    }
+	
+    function dropItem()
+    {
+      //Try	to drop the item only if the backpack isn't empty-cells
+	  if(backpack.length !== 0)
+	  {
+			//Find the item's array index number in the backpack
+			var backpackIndexNumber = backpack.indexOf(item);
+		
+			//The item is in the backpack if the backpackIndexNumber isn't -1
+			if(backpackIndexNumber !== -1)
+			{
+		
+				//Tell the player that the item has been droppped
+				gameMessage = "You dropped the " + item + ".";
+		  
+				//Add the item from the backpack to the game world
+				items.push(backpack[backpackIndexNumber]);
+				itemLocations.push(mapLocation);
+		  
+				//Remove the item from the player's backpack
+				backpack.splice(backpackIndexNumber, 1);
+			}
+			else
+			{
+		    //Message if the player tries to drop something that's not in the backpack
+			gameMessage = "You can't do that.";
+			}
+	  }
+	  else
+	  {
+	    //Message if the backpack is empty-cells
+		gameMessage = "You're not carrying anything.";
+	  }
+	}
+	
+	function useItem()
+	{
+	  //1. Find out if the item is in the backpack
+
+	  //Find the item's array index number in the backpack
+	  var backpackIndexNumber = backpack.indexOf(item);
+	  
+	  //If the index number is -1, then it isn't in the backpack.
+	  //Tell the player that he or she isn't carrying it.
+	  if(backpackIndexNumber === -1)
+	  {
+		gameMessage = "You're not carrying it.";
+	  }
+	  
+	  //If there are no items in the backpack, then
+	  //tell the player the backpack is empty-cells
+	  if(backpack.length === 0)
+	  {
+	    gameMessage += " You backpack is empty";
+	  }
+	  
+	  //2. If the item is found in the backpack
+	  //figure out what to do with it
+	  if(backpackIndexNumber !== -1)
+	  {
+	    switch(item)
+		{
+		  case "flute":
+			if(mapLocation === 8)
+			{
+				gameMessage = "Beautiful music fills the air. </br>";
+				gameMessage += "A wizard steps outside and gives you" 
+				gameMessage += " a sword.";
+				
+				//Add the sword to the world
+				items.push("sword");
+				itemLocations.push(mapLocation);
+			}
+			else
+			{
+				gameMessage = "You try and play the flute "
+				gameMessage += "but it makes no sound here.";
+			}
+			break;
+			
+		  case "sword":
+		    if(mapLocation === 3)
+			{
+			  gameMessage
+			  = "You swing the sword and slay the dragon! ";
+			  gameMessage
+			  += "You've saved the forest of Lyrica!";
+			}
+			else
+			{
+			  gameMessage
+			  = "You swing the sword listlessly.";
+			}
+			break;
+		  
+		  case "stone":
+		    if(mapLocation === 1)
+			{
+			  gameMessage = "You drop the stone in the well. ";
+			  gameMessage += "A magical flute appears!";
+			  
+			  //Remove the item from the player's backpack
+			  backpack.splice(backpackIndexNumber, 1);
+			  
+			  //Add the flute to the world
+			  items.push("flute");
+			  itemLocations.push(mapLocation);
+			  
+			  //Reset the location's help message
+			  helpMessages[mapLocation] = "";
+			  gameMessage[mapLocation] = "";
+			}
+			else
+			{
+			  gameMessage
+			  = "You fumble with the stone in your pocket.";
+			}
+			break;
+		}
+	  }
+    }
+     function render()
+	{
+	  //Render the location
+	  output.innerHTML = map[mapLocation] + "</br>Directions: South, East, West, North";
+	  image.src = "C:/Users/Able Valued Client/Pictures/Game Images/" + images[mapLocation];
+      
+     
+	  
+	  for(var i = 0; i < magicalBeingsLocations.length; i++)
+	  {
+			//Find out if there's an item at this location
+			if(mapLocation === magicalBeingsLocations[i])
+			{
+				//Display it
+				output.innerHTML
+				+= "</br>You see a <strong>"
+				+ magicalBeings[i] 
+				+ "</strong> here.";              
+			
+				riddle();	
+                
+			}
+	  }
+	  
+	  //Display the game message
+      output.innerHTML += "</br><em>" + gameMessage + "</em>";
+	  
+	  //Display the player's backpack contents
+	  if(backpack.length !== 0)
+	  {
+	    output.innerHTML += "</br>You are carrying: " + backpack.join(", ");
+	  }
+    }
+	
+	
+</script>
+</body>
+</html>
